@@ -18,44 +18,61 @@ package com.example.androiddevchallenge
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.androiddevchallenge.ui.theme.MyTheme
+import com.example.androiddevchallenge.viewmodel.LoginState
+import com.example.androiddevchallenge.viewmodel.LoginViewModel
 
+@ExperimentalMaterialApi
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyTheme {
-                MyApp()
+            val isDarkTheme by remember { mutableStateOf(true) }
+            MyTheme(isDarkTheme) {
+                MyApp(isDarkTheme = isDarkTheme)
             }
         }
     }
 }
 
 // Start building your app here!
+@ExperimentalMaterialApi
 @Composable
-fun MyApp() {
-    Surface(color = MaterialTheme.colors.background) {
-        Text(text = "Ready... Set... GO!")
+fun MyApp(viewModel: LoginViewModel = viewModel(), isDarkTheme: Boolean) {
+
+    when (viewModel.loginState) {
+        LoginState.WELCOME -> WelcomeScreen(
+            onLoginScreen = { viewModel.setLogin(LoginState.LOGIN) }
+        )
+        LoginState.LOGIN -> LoginScreen(
+            isDarkTheme = isDarkTheme,
+            onLogin = { viewModel.setLogin(LoginState.VALIDATED) }
+        )
+        LoginState.VALIDATED -> Home()
     }
 }
 
+@ExperimentalMaterialApi
 @Preview("Light Theme", widthDp = 360, heightDp = 640)
 @Composable
 fun LightPreview() {
     MyTheme {
-        MyApp()
+        MyApp(isDarkTheme = false)
     }
 }
 
+@ExperimentalMaterialApi
 @Preview("Dark Theme", widthDp = 360, heightDp = 640)
 @Composable
 fun DarkPreview() {
     MyTheme(darkTheme = true) {
-        MyApp()
+        MyApp(isDarkTheme = true)
     }
 }

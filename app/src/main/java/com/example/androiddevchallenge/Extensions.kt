@@ -13,14 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.androiddevchallenge.ui.theme
+package com.example.androiddevchallenge
 
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Shapes
-import androidx.compose.ui.unit.dp
+import java.text.NumberFormat
+import java.util.Locale
+import kotlin.math.truncate
 
-val shapes = Shapes(
-    small = RoundedCornerShape(4.dp),
-    medium = RoundedCornerShape(4.dp),
-    large = RoundedCornerShape(48.dp)
-)
+private var numberFormat = NumberFormat.getCurrencyInstance(Locale.getDefault())
+
+fun Double.toStringMoney(): String {
+    val result = this - truncate(this)
+    numberFormat.maximumFractionDigits = if (result != 0.0) 2 else 0
+    return numberFormat.format(this)
+}
+
+fun Double.toStatusString(): String {
+    return when {
+        this > 0 -> "+%.2f%%".format(this)
+        this < 0 -> "%.2f%%".format(this)
+        else -> "0%"
+    }
+}

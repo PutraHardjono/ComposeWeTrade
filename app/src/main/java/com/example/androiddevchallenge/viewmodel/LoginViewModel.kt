@@ -13,14 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.androiddevchallenge.ui.theme
+package com.example.androiddevchallenge.viewmodel
 
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Shapes
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
 
-val shapes = Shapes(
-    small = RoundedCornerShape(4.dp),
-    medium = RoundedCornerShape(4.dp),
-    large = RoundedCornerShape(48.dp)
-)
+enum class LoginState {
+    WELCOME,
+    LOGIN,
+    VALIDATED
+}
+
+class LoginViewModel : ViewModel() {
+    var loginState by mutableStateOf(LoginState.WELCOME)
+        private set
+
+    fun setLogin(loginState: LoginState) {
+        this.loginState = loginState
+    }
+}
