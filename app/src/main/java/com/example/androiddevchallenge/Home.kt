@@ -44,6 +44,7 @@ import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.rememberBackdropScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,7 +65,10 @@ import java.util.Locale
 
 @ExperimentalMaterialApi
 @Composable
-fun Home(isDarkTheme: Boolean = false) {
+fun Home(
+    isDarkTheme: Boolean = false,
+    onSetStatusBar: (isBackgroundDark: Boolean) -> Unit
+) {
 
     val scaffoldState = rememberBackdropScaffoldState(BackdropValue.Revealed)
     var selectedTab by remember { mutableStateOf(TabHeader.ACCOUNT) }
@@ -79,11 +83,8 @@ fun Home(isDarkTheme: Boolean = false) {
                 onTabSelected = { selectedTab = it }
             )
         },
-        backLayerContent = {
-            AccountScreen(homeViewModel = viewModel)
-        },
+        backLayerContent = { AccountScreen(homeViewModel = viewModel) },
         frontLayerContent = { FrontLayerScreen(isDarkTheme = isDarkTheme, homeViewModel = viewModel) },
-
         backLayerBackgroundColor = MaterialTheme.colors.background,
         frontLayerShape = RectangleShape,
         stickyFrontLayer = false, // Whether the front layer should stick to the height of the back layer
@@ -91,6 +92,17 @@ fun Home(isDarkTheme: Boolean = false) {
         headerHeight = 64.dp, // The minimum height of the front layer when it is inactive.
         frontLayerScrimColor = Color.Transparent // The color of the scrim applied to the front layer when the back layer is revealed. If you set this to Color.Transparent, then a scrim will not be applied and interaction with the front layer will not be blocked when the back layer is revealed.
     )
+
+    // check front layer value, then, change statusbar text/icon color to white/dark
+    LaunchedEffect(scaffoldState.currentValue) {
+        when {
+            scaffoldState.isRevealed -> onSetStatusBar(true)
+            scaffoldState.isConcealed && isDarkTheme -> onSetStatusBar(true)
+            else -> {
+                onSetStatusBar(false)
+            }
+        }
+    }
 }
 
 enum class TabHeader {

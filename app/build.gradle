@@ -81,5 +81,4 @@ dependencies {
 
     // Jetpack Compose Integration for ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha03"
-
 }

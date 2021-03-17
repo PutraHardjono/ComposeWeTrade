@@ -15,7 +15,10 @@
  */
 package com.example.androiddevchallenge
 
+import android.graphics.Color
 import android.os.Bundle
+import android.view.View
+import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
@@ -23,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.androiddevchallenge.ui.theme.MyTheme
 import com.example.androiddevchallenge.viewmodel.LoginState
@@ -33,19 +35,54 @@ import com.example.androiddevchallenge.viewmodel.LoginViewModel
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        @Suppress("DEPRECATION")
+        window.apply {
+            clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+
+            // Set the text/icon in StatusBar to white.
+            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+
+            // Set StatusBarBackgroundColor to transparent
+            statusBarColor = Color.TRANSPARENT
+        }
+
         setContent {
-            val isDarkTheme by remember { mutableStateOf(true) }
+            val isDarkTheme by remember { mutableStateOf(false) }
+
             MyTheme(isDarkTheme) {
-                MyApp(isDarkTheme = isDarkTheme)
+                MyApp(
+                    isDarkTheme = isDarkTheme,
+                    onSetStatusBar = { isBackgroundDark ->
+                        if (isBackgroundDark) setStatusBarTextIconToWhite()
+                        else setStatusBarTextIconToDark()
+                    }
+                )
             }
         }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun setStatusBarTextIconToDark() {
+        window.decorView.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+    }
+
+    @Suppress("DEPRECATION")
+    private fun setStatusBarTextIconToWhite() {
+        window.decorView.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
     }
 }
 
 // Start building your app here!
 @ExperimentalMaterialApi
 @Composable
-fun MyApp(viewModel: LoginViewModel = viewModel(), isDarkTheme: Boolean) {
+fun MyApp(
+    viewModel: LoginViewModel = viewModel(),
+    isDarkTheme: Boolean,
+    onSetStatusBar: (isBackgroundDark: Boolean) -> Unit
+) {
 
     when (viewModel.loginState) {
         LoginState.WELCOME -> WelcomeScreen(
@@ -55,24 +92,9 @@ fun MyApp(viewModel: LoginViewModel = viewModel(), isDarkTheme: Boolean) {
             isDarkTheme = isDarkTheme,
             onLogin = { viewModel.setLogin(LoginState.VALIDATED) }
         )
-        LoginState.VALIDATED -> Home()
-    }
-}
-
-@ExperimentalMaterialApi
-@Preview("Light Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun LightPreview() {
-    MyTheme {
-        MyApp(isDarkTheme = false)
-    }
-}
-
-@ExperimentalMaterialApi
-@Preview("Dark Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun DarkPreview() {
-    MyTheme(darkTheme = true) {
-        MyApp(isDarkTheme = true)
+        LoginState.VALIDATED -> Home(
+            isDarkTheme = isDarkTheme,
+            onSetStatusBar = onSetStatusBar
+        )
     }
 }
